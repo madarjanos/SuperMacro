@@ -83,6 +83,9 @@ static int	sub_endix[MAX_SUBS];	/* instruction index of each ENDSUB (set at load
 
 static int	vars[MAX_VARS];		/* integer memory variables                  */
 
+static BYTE	held_key        = 0;	/* last key pressed via KEYDOWN (0 = none)   */
+static int	held_leftbutton = 0;	/* non-zero if left mouse button is held down */
+
 static RECT	grabrct;		/* screen-capture region                         */
 static int	grabix;			/* auto-incrementing file name counter           */
 static int	grabbpp;		/* capture colour depth (1,4,8,15,16,24,32)      */
@@ -142,7 +145,16 @@ static int ResolveParam(int value, int is_var)
 static int UserInterrupt(void)
 {
 	if (GetAsyncKeyState(key_halt) != 0) {
-		/* TODO: release any key/mouse button that is currently held down */
+		/* Release any keyboard key that is still held down */
+		if (held_key != 0) {
+			keybd_event(held_key, 0, KEYEVENTF_KEYUP, 0);
+			held_key = 0;
+		}
+		/* Release the left mouse button if it is still held down */
+		if (held_leftbutton) {
+			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+			held_leftbutton = 0;
+		}
 		macro_ix = -1;
 		return 1;
 	}
@@ -277,6 +289,7 @@ static void MouseMove(int x, int x_is_var, int y, int y_is_var)
 /* LEFTDOWN  —  press the left mouse button */
 static void MouseLeftDown(void)
 {
+	held_leftbutton = 1;
 	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 	Sleep(1);
 }
@@ -285,6 +298,7 @@ static void MouseLeftDown(void)
 static void MouseLeftUp(void)
 {
 	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+	held_leftbutton = 0;
 	Sleep(1);
 }
 
@@ -317,7 +331,8 @@ static void GetMouseXY(int var_ix1, int var_ix2)
 /* KEYDOWN vcode  —  press a key (virtual key code, literal or from var) */
 static void KeyDown(int vcode, int vcode_is_var)
 {
-	keybd_event((BYTE)ResolveParam(vcode, vcode_is_var), 0, 0, 0);
+	held_key = (BYTE)ResolveParam(vcode, vcode_is_var);
+	keybd_event(held_key, 0, 0, 0);
 	Sleep(1);
 }
 
@@ -325,6 +340,7 @@ static void KeyDown(int vcode, int vcode_is_var)
 static void KeyUp(int vcode, int vcode_is_var)
 {
 	keybd_event((BYTE)ResolveParam(vcode, vcode_is_var), 0, KEYEVENTF_KEYUP, 0);
+	held_key = 0;
 	Sleep(1);
 }
 
