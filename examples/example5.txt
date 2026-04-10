@@ -1,0 +1,54 @@
+WRITELN 1. Please open Excel, write e.g. 20 numbers in a new table A column
+WRITELN 2. Please leave the selected cell (e.g. on A20)
+WRITELN 3. Move the mouse cursor on the TITLE BAR of Excel window (a pure part of title bar!)
+WRITELN 4. Press Enter if done - but leave the mouse cursor at the right position!!
+READ $0
+
+// Store mouse cursor X,Y in 10,11 variables
+GETMOUSE $10 $11
+
+WRITELN 1. Please open Notepad, write some text in it
+WRITELN 2. Move the mouse cursor INSIDE the Notepad window (where you can type)
+WRITELN 3. Press Enter if done - but leave the mouse cursor at the right position!!
+READ $0
+
+// Store mouse cursor X,Y in 20,21 variables
+GETMOUSE $20 $21
+
+
+//** Main loop (10 times) **
+LOOP 10
+
+ //* Change to Excel by click in right place *
+ CLICK $10 $11
+ // Take some time for Windows to activate and the window
+ WAIT 500
+
+ //Press two Up-arrow key
+ LOOP 2
+  KEYPRESS 38
+  //a little wait again is a good idea (the Excel needs time)
+  WAIT 50
+ ENDLOOP
+
+ //Press CTRL-C (copying a cell)
+ KEYPRESS_CTRL 67
+ WAIT 50
+
+ //* Change to Notepad by click in right place *
+ CLICK $20 $21
+ // again: some wait is a good idea
+ WAIT 500
+
+ //Press two Backspace keys
+ KEYPRESS 8
+ KEYPRESS 8
+ WAIT 300
+
+ //Press CTRL-V (paste)
+ KEYPRESS_CTRL 86
+ WAIT 50
+
+ENDLOOP
+//** End of main loop **
+

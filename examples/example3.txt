@@ -1,0 +1,21 @@
+SUB 0
+ WRITE .
+ WAIT 100
+ENDSUB
+
+SUB 1
+ WRITE +
+ WAIT 100
+ENDSUB
+
+
+CALL 0
+CALL 1
+CALL 1
+
+
+
+
+
+
+

@@ -1,22 +1,25 @@
-WRITE You have 2 seconds before starting ...
-SET $1 2
+WRITE You have 3 seconds before starting ...
+SET $1 3
 SET $2 $1
 ADD $2 48
 LOOP $1
- WRITECHAR $2
- WRITE ... 
- ADD $2 -1
- WAIT 1000
+	WRITECHAR $2
+	WRITE ... 
+	ADD $2 -1
+	WAIT 1000
 ENDLOOP
 WRITELN
 
 WRITELN I will write the mouse cursor coordinates. Please move the mouse cursor to anywhere on the Desktop! (I will stop after 10 min.)
 
 LOOP 12000
- WRITECHAR 13
- GETMOUSE $3 $4
- WRITE (
- WRITEVAR $3 $4
- WRITE )     
- WAIT 50
+	WRITECHAR 13
+	GETMOUSE $3 $4
+	WRITE (
+	WRITEVAR $3 $4
+	WRITE )     
+	WAIT 50
 ENDLOOP
+
+WRITELN Have a nice day!
+

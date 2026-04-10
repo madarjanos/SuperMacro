@@ -1,0 +1,10 @@
+WRITELN I will move the mouse cursor to right
+
+GETMOUSE $10 $11
+
+LOOP 30
+ ADD $10 10
+ MOVE $10 $11
+ WAIT 100
+ENDLOOP
+
