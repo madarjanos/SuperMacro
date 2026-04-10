@@ -108,7 +108,7 @@ Loops are stack-based and can be nested.
 > - A mismatched `ENDLOOP` (no open `LOOP`) or an unclosed `LOOP` (no matching `ENDLOOP`) is detected at load time and
 reported as an error.
 > - Loops can be nested until stack overflow.
-> - Stack overflow will neither generate error nor halt the script.
+> - A stack overflow neither generates an error nor stops the script.
 
 ```
 LOOP 10
@@ -136,7 +136,7 @@ Subroutines are stack-based. They can call other subroutines.
 >   is detected at load time and reported as an error.
 > - `CALL` to an undefined subroutine id is silently ignored at runtime.
 > - Recursion is possible but it is a **very bad idea** because you cannot break it!
-> - Stack overflow will neither generate error nor halt the script.
+> - A stack overflow neither generates an error nor stops the script.
 
 ```
 SUB 0
