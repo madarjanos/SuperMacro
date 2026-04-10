@@ -595,9 +595,9 @@ static void CutNextWord(const char *s, int *pos, int sLen, char *out, int outSiz
 {
 	int i = *pos, j, len;
 
-	while (i < sLen && s[i] == ' ') i++;
+	while (i < sLen && (s[i] == ' ' || s[i] == '\t')) i++;
 	j = i;
-	while (j < sLen && s[j] != ' ') j++;
+	while (j < sLen && s[j] != ' ' && s[j] != '\t') j++;
 
 	len = j - i;
 	if (len >= outSize) len = outSize - 1;
@@ -686,7 +686,7 @@ void LoadMacro(const char **lines, int lineCount)
 
 		/* Skip comment lines (starting with ; or //) */
 		p = 0;
-		while (p < sLen && s[p] == ' ') p++;
+		while (p < sLen && (s[p] == ' ' || s[p] == '\t')) p++;
 		if (s[p] == ';' || (s[p] == '/' && p + 1 < sLen && s[p+1] == '/'))
 			continue;
 
@@ -739,8 +739,8 @@ void LoadMacro(const char **lines, int lineCount)
 		m->strparam      = NULL;
 
 		if (k == 21 /* WRITE */ || k == 26 /* WRITELN */) {
-			/* String argument: everything after the command word (skip one space) */
-			if (pos < sLen && s[pos] == ' ') pos++;
+			/* String argument: everything after the command word (skip one whitespace) */
+			if (pos < sLen && (s[pos] == ' ' || s[pos] == '\t')) pos++;
 			m->strparam = _strdup(s + pos);
 		} else {
 			/* Up to two generic parameters */
