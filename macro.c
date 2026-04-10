@@ -16,16 +16,17 @@
  *    ADD $0 10         -- add 10 to var 0
  *    ADD $0 $1         -- add var 1 to var 0
  *
- *  Loop (no slot index needed — stack-based):
+ *  Loop (no slot index needed - stack-based):
  *    LOOP 100          -- repeat 100 times
- *    LOOP $3           -- repeat as many times as stored in var 3
+ *     LOOP $3           -- repeat as many times as stored in var 3
  *      ...
  *      LOOP 5          -- nested loops work naturally
  *        ...
  *      ENDLOOP
+ *     ENDLOOP
  *    ENDLOOP
  *
- *  Subroutine (stack-based — subs can call other subs):
+ *  Subroutine (stack-based - subs can call other subs):
  *    SUB 0
  *      ...
  *      CALL 1          -- call another sub from within a sub
@@ -90,7 +91,7 @@ static RECT	grabrct;		/* screen-capture region                         */
 static int	grabix;			/* auto-incrementing file name counter           */
 static int	grabbpp;		/* capture colour depth (1,4,8,15,16,24,32)      */
 
-/* Command name table — indices must match the switch in StepMacro */
+/* Command name table - indices must match the switch in StepMacro */
 static const char *commands[] = {
 	/* 0*/  "LOOP",
 	/* 1*/  "ENDLOOP",
@@ -126,7 +127,7 @@ static const int NUM_COMMANDS = sizeof(commands) / sizeof(commands[0]);
 /* ----------------------------- HELPERS ----------------------------------- */
 
 /*
- * ResolveParam — return the effective integer value of a parameter.
+ * ResolveParam - return the effective integer value of a parameter.
  * If is_var is non-zero, value is a variable index and vars[value] is returned.
  */
 static int ResolveParam(int value, int is_var)
@@ -163,7 +164,7 @@ static int UserInterrupt(void)
 
 /* ----------------------- INSTRUCTION HANDLERS ---------------------------- */
 
-/* SET $var literal_or_var  —  assign a value (or copy another variable) */
+/* SET $var literal_or_var  -  assign a value (or copy another variable) */
 static void SetVar(int var_ix, int value, int value_is_var)
 {
 	if ((var_ix < 0) || (var_ix >= MAX_VARS))
@@ -171,7 +172,7 @@ static void SetVar(int var_ix, int value, int value_is_var)
 	vars[var_ix] = ResolveParam(value, value_is_var);
 }
 
-/* ADD $var literal_or_var  —  add a value (or another variable) to a variable */
+/* ADD $var literal_or_var  -  add a value (or another variable) to a variable */
 static void AddVar(int var_ix, int value, int value_is_var)
 {
 	if ((var_ix < 0) || (var_ix >= MAX_VARS))
@@ -179,7 +180,7 @@ static void AddVar(int var_ix, int value, int value_is_var)
 	vars[var_ix] += ResolveParam(value, value_is_var);
 }
 
-/* WAIT ms  —  block for the given number of milliseconds (clamped to 10 s) */
+/* WAIT ms  -  block for the given number of milliseconds (clamped to 10 s) */
 static void Wait(int interval_msec)
 {
 	if (interval_msec < 0)     interval_msec = 0;
@@ -206,7 +207,7 @@ static int stack_pop(void)
 /* --- LOOP --- */
 
 /*
- * LOOP count  —  push the LOOP instruction position and iteration counter
+ * LOOP count  -  push the LOOP instruction position and iteration counter
  *                onto the shared stack; no slot index needed.
  */
 static void LoopBegin(int count, int count_is_var)
@@ -216,26 +217,26 @@ static void LoopBegin(int count, int count_is_var)
 }
 
 /*
- * ENDLOOP  —  check the top-of-stack counter:
+ * ENDLOOP  -  check the top-of-stack counter:
  *   > 0  decrement and jump back to the LOOP instruction (StepMacro adds 1)
  *   <= 0 pop both values and fall through
  */
 static void LoopEnd(void)
 {
 	if (sp < 2)
-		return; /* stack underflow — script error */
+		return; /* stack underflow - script error */
 	if (stack[sp - 1] > 0) {
 		stack[sp - 1]--;
 		macro_ix = stack[sp - 2]; /* StepMacro adds 1, landing after LOOP */
 	} else {
-		sp -= 2; /* loop finished — discard counter and saved position */
+		sp -= 2; /* loop finished - discard counter and saved position */
 	}
 }
 
 /* --- SUBROUTINES --- */
 
 /*
- * SUB id  —  if reached by fallthrough (not via CALL), skip the body.
+ * SUB id  -  if reached by fallthrough (not via CALL), skip the body.
  *             sub_endix[] is still needed for this; it is filled at load time.
  */
 static void SubBegin(int subix)
@@ -247,7 +248,7 @@ static void SubBegin(int subix)
 }
 
 /*
- * ENDSUB  —  pop the return address and jump back.
+ * ENDSUB  -  pop the return address and jump back.
  *             No index needed; the stack records exactly where to return.
  *             Because CALL pushes one value and ENDSUB pops one, nested
  *             sub calls work naturally.
@@ -258,7 +259,7 @@ static void SubEnd(void)
 }
 
 /*
- * CALL id_or_var  —  push the return address onto the stack and jump into
+ * CALL id_or_var  -  push the return address onto the stack and jump into
  *                    the subroutine body (instruction after SUB).
  */
 static void CallSub(int subix, int subix_is_var)
@@ -266,7 +267,7 @@ static void CallSub(int subix, int subix_is_var)
 	subix = ResolveParam(subix, subix_is_var);
 	if ((subix < 0) || (subix >= MAX_SUBS))
 		return;
-	/* Guard: SUB not defined in the loaded script — ignore silently */
+	/* Guard: SUB not defined in the loaded script - ignore silently */
 	if (sub_beginix[subix] == -1)
 		return;
 	stack_push(macro_ix);          /* save return address (StepMacro adds 1 on return) */
@@ -275,7 +276,7 @@ static void CallSub(int subix, int subix_is_var)
 
 /* --- MOUSE --- */
 
-/* MOVE x y  —  move cursor to pixel coordinates (either literal or from vars) */
+/* MOVE x y  -  move cursor to pixel coordinates (either literal or from vars) */
 static void MouseMove(int x, int x_is_var, int y, int y_is_var)
 {
 	WORD wx = (WORD)ResolveParam(x, x_is_var);
@@ -286,7 +287,7 @@ static void MouseMove(int x, int x_is_var, int y, int y_is_var)
 	Sleep(1);
 }
 
-/* LEFTDOWN  —  press the left mouse button */
+/* LEFTDOWN  -  press the left mouse button */
 static void MouseLeftDown(void)
 {
 	held_leftbutton = 1;
@@ -294,7 +295,7 @@ static void MouseLeftDown(void)
 	Sleep(1);
 }
 
-/* LEFTUP  —  release the left mouse button */
+/* LEFTUP  -  release the left mouse button */
 static void MouseLeftUp(void)
 {
 	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
@@ -302,7 +303,7 @@ static void MouseLeftUp(void)
 	Sleep(1);
 }
 
-/* CLICK x y  —  move to coordinates then left-click */
+/* CLICK x y  -  move to coordinates then left-click */
 static void Click(int x, int x_is_var, int y, int y_is_var)
 {
 	MouseMove(x, x_is_var, y, y_is_var);
@@ -311,7 +312,7 @@ static void Click(int x, int x_is_var, int y, int y_is_var)
 }
 
 /*
- * GETMOUSE $varx $vary  —  store current cursor position in two variables.
+ * GETMOUSE $varx $vary  -  store current cursor position in two variables.
  * Both parameters MUST be variable references.
  */
 static void GetMouseXY(int var_ix1, int var_ix2)
@@ -328,7 +329,7 @@ static void GetMouseXY(int var_ix1, int var_ix2)
 
 /* --- KEYBOARD --- */
 
-/* KEYDOWN vcode  —  press a key (virtual key code, literal or from var) */
+/* KEYDOWN vcode  -  press a key (virtual key code, literal or from var) */
 static void KeyDown(int vcode, int vcode_is_var)
 {
 	held_key = (BYTE)ResolveParam(vcode, vcode_is_var);
@@ -336,7 +337,7 @@ static void KeyDown(int vcode, int vcode_is_var)
 	Sleep(1);
 }
 
-/* KEYUP vcode  —  release a key */
+/* KEYUP vcode  -  release a key */
 static void KeyUp(int vcode, int vcode_is_var)
 {
 	keybd_event((BYTE)ResolveParam(vcode, vcode_is_var), 0, KEYEVENTF_KEYUP, 0);
@@ -344,14 +345,14 @@ static void KeyUp(int vcode, int vcode_is_var)
 	Sleep(1);
 }
 
-/* KEYPRESS vcode  —  press and release a key */
+/* KEYPRESS vcode  -  press and release a key */
 static void KeyPress(int vcode, int vcode_is_var)
 {
 	KeyDown(vcode, vcode_is_var);
 	KeyUp(vcode, vcode_is_var);
 }
 
-/* KEYPRESS_CTRL vcode  —  Ctrl+key combo */
+/* KEYPRESS_CTRL vcode  -  Ctrl+key combo */
 static void KeyPress_Ctrl(int vcode, int vcode_is_var)
 {
 	/* Small delays around the key press prevent timing issues on older Windows */
@@ -405,7 +406,7 @@ static void WriteVar(int var_ix1, int var_ix2, int has_var2, char *res, int resS
 		snprintf(res, resSize, "%d", vars[var_ix1]);
 }
 
-/* WRITELN <text> — same as WRITE but appends a newline */
+/* WRITELN <text> - same as WRITE but appends a newline */
 static void WriteLn(const char *strparam, char *res, int resSize)
 {
 	if (!strparam || !res || resSize <= 0)
@@ -413,7 +414,7 @@ static void WriteLn(const char *strparam, char *res, int resSize)
 	snprintf(res, resSize, "%s\n", strparam);
 }
 
-/* WRITELNVAR $var1 [$var2] — same as WRITEVAR but appends a newline */
+/* WRITELNVAR $var1 [$var2] - same as WRITEVAR but appends a newline */
 static void WriteLnVar(int var_ix1, int var_ix2, int has_var2, char *res, int resSize)
 {
 	if (!res || resSize <= 0)
@@ -541,7 +542,7 @@ static void ScrGrab(char *res, int resSize)
 /* ----------------------------- MACRO EXECUTION --------------------------- */
 
 /*
- * StepMacro — execute the next pending macro instruction.
+ * StepMacro - execute the next pending macro instruction.
  *
  *   res / resSize  output buffer written by WRITE, WRITECHAR, SCRGRAB, etc.
  *   returns        1 while the macro is still running,
@@ -604,7 +605,7 @@ int StepMacro(char *res, int resSize)
 /* ----------------------- MACRO TEXT PARSING ------------------------------ */
 
 /*
- * CutNextWord — extract the next whitespace-delimited token from s[*pos..sLen],
+ * CutNextWord - extract the next whitespace-delimited token from s[*pos..sLen],
  *               advance *pos past it, and copy the token (upper-cased) into out.
  */
 static void CutNextWord(const char *s, int *pos, int sLen, char *out, int outSize)
@@ -627,7 +628,7 @@ static void CutNextWord(const char *s, int *pos, int sLen, char *out, int outSiz
 }
 
 /*
- * ParseParam — parse one token as a variable reference ($N) or a literal integer.
+ * ParseParam - parse one token as a variable reference ($N) or a literal integer.
  *
  *   word         the token string (may start with '$')
  *   out_value    receives the parsed number or variable index
@@ -660,7 +661,7 @@ static int ParseParam(const char *word, int *out_value, int *out_is_var)
 }
 
 /*
- * LoadMacro — parse an array of text lines and build the macro instruction array.
+ * LoadMacro - parse an array of text lines and build the macro instruction array.
  *
  *   lines      array of C strings, one per line
  *   lineCount  number of elements in lines[]
@@ -711,7 +712,7 @@ void LoadMacro(const char **lines, int lineCount)
 		for (k = 0; k < NUM_COMMANDS; k++)
 			if (strcmp(commands[k], word) == 0) break;
 		if (k >= NUM_COMMANDS)
-			continue; /* unknown token — skip line */
+			continue; /* unknown token - skip line */
 
 		/* --- Load-time structural validation --- */
 		if (k == 0 /* LOOP */) {
@@ -800,7 +801,7 @@ void LoadMacro(const char **lines, int lineCount)
 /* --------------------------------- INIT ---------------------------------- */
 
 /*
- * MacroInit — initialise all module-level state.
+ * MacroInit - initialise all module-level state.
  * Call once at program startup before LoadMacro / StepMacro.
  */
 void MacroInit(void)
@@ -826,7 +827,7 @@ void MacroInit(void)
 }
 
 /*
- * MacroShutdown — clean up resources allocated by MacroInit.
+ * MacroShutdown - clean up resources allocated by MacroInit.
  * Call once at program exit.
  */
 void MacroShutdown(void)
